@@ -3,7 +3,7 @@ package com.abcode.fluxjwt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextImpl;
@@ -24,7 +24,7 @@ public class SecurityContext implements ServerSecurityContextRepository {
 
     @Override
     public Mono<org.springframework.security.core.context.SecurityContext> load(ServerWebExchange exchange) {
-        ServerHttpRequest request = (ServerHttpRequest) exchange.getRequest();
+        ServerHttpRequest request =  exchange.getRequest();
         String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         String token = null;
         if (authHeader != null && authHeader.contains("Bearer ")) {

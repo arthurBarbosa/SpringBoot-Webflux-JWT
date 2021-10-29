@@ -23,15 +23,15 @@ public class JwtUtils implements Serializable {
 
     private Claims getAllClaimsFromToken(String token) {
         return Jwts.parser()
-                .setSigningKey("MY_SECRET")
+                .setSigningKey("secret")
                 .parseClaimsJws(token)
                 .getBody();
     }
 
-    public String getToken(User user) {
+    public String genToken(User user) {
         return Jwts.builder()
                 .setSubject(user.getUsername())
-                .signWith(SignatureAlgorithm.ES256, "MY_SECRET")
+                .signWith(SignatureAlgorithm.HS256, "secret")
                 .compact();
     }
 }

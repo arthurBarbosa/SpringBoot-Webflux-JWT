@@ -1,5 +1,6 @@
 package com.abcode.fluxjwt.handler;
 
+import com.abcode.fluxjwt.JwtUtils;
 import com.abcode.fluxjwt.domain.User;
 import com.abcode.fluxjwt.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,8 @@ public class AuthHandler {
     private UserRepository userRepository;
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+    @Autowired
+    private JwtUtils jwtUtils;
 
     public Mono<ServerResponse> signUp(ServerRequest request) {
         Mono<User> userMono = request.bodyToMono(User.class);
@@ -28,5 +31,22 @@ public class AuthHandler {
                 })
                 .flatMap(this.userRepository::save)
                 .flatMap(user -> ServerResponse.ok().body(BodyInserters.fromValue(user)));
+    }
+
+    public Mono<ServerResponse> login(ServerRequest request) {
+        Mono<User> userMono = request.bodyToMono(User.class);
+        return userMono
+                .flatMap(u -> this.userRepository.findByUsername(u.getUsername())
+                        .flatMap(user -> {
+                            if (passwordEncoder.matches(u.getPassword(), user.getPassword())) {
+                                return ServerResponse.ok()
+                                        .body(BodyInserters.fromValue(jwtUtils.genToken(user)));
+                            } else {
+                                return ServerResponse.badRequest()
+                                        .body(BodyInserters.fromValue("Invalid credentials"));
+                            }
+
+                        }).switchIfEmpty(ServerResponse.badRequest()
+                                .body(BodyInserters.fromValue("User does not exists"))));
     }
 }
