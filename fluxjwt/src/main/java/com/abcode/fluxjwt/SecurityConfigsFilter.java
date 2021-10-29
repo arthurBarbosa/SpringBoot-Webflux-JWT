@@ -1,5 +1,6 @@
 package com.abcode.fluxjwt;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -12,11 +13,19 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 @EnableWebFluxSecurity
 public class SecurityConfigsFilter {
 
+    @Autowired
+    private AuthManager authManager;
+
+    @Autowired
+    private SecurityContext securityContext;
+
     @Bean
     SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
                 .cors().disable()
                 .csrf().disable()
+                .authenticationManager(authManager)
+                .securityContextRepository(securityContext)
                 .authorizeExchange()
                 .pathMatchers(new String[]{"/sign-up/**", ""}).permitAll()
                 .pathMatchers(HttpMethod.OPTIONS).permitAll()
